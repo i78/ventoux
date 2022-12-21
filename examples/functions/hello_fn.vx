@@ -1,0 +1,5 @@
+hello = "Hello Ventoux!"
+say s = s
+
+hello
+say "Ventoux!"

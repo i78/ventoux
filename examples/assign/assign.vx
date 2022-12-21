@@ -1,0 +1,9 @@
+greeting = "Hello"
+greeting2 = "This really works!"
+greeting3 = greeting2
+pi = 3.141592
+"Hello Variables!\n################"
+greeting
+greeting2
+greeting3
+pi

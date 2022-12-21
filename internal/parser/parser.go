@@ -1,19 +1,25 @@
 package parser
 
 import (
+	"dreese.de/ventoux/internal/grammar"
 	"github.com/alecthomas/participle/v2"
 	"github.com/alecthomas/participle/v2/lexer"
 )
 
 var (
 	lex = lexer.MustSimple([]lexer.SimpleRule{
-		{"Literal", `".*"`},
+		{`String`, `"(?:\\.|[^"])*"`},
+		// {"Int", `\d+`},
+		{"Number", `[+-]?([0-9]*[.])?[0-9]+`},
+		{"Identifier", `[a-zA-Z0-9]+`},
 		{"comment", `//.*|/\*.*?\*/`},
-		{"whitespace", `\s+`},
+		{"Equals", `=`},
+		{"whitespace", ` `},
+		{"eol", `[\n\r]+`},
 	})
 	parser = participle.MustBuild[Program](
 		participle.Lexer(lex),
-		participle.Unquote("Literal"),
+		participle.Unquote("String"),
 		participle.UseLookahead(2))
 )
 
@@ -23,11 +29,5 @@ func GetParser() *participle.Parser[Program] {
 
 type Program struct {
 	Pos    lexer.Position
-	TopDec []*TopDec `@@*`
-}
-
-type TopDec struct {
-	Pos lexer.Position
-
-	Literal string `@Literal`
+	TopDec []*grammar.TopDec `@@*`
 }
