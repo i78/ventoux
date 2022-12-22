@@ -1,0 +1,7 @@
+firstFib = 3
+secondFib = 5
+thirdFib = firstFib + secondFib
+thirdFib
+20 - 1
+2 ^ 8
+1 << 16

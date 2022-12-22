@@ -19,13 +19,20 @@ type RunCommand struct {
 func (sv *RunCommand) Run(ctx *kong.Context) error {
 	if content, err := os.ReadFile(sv.Sourcefile); err == nil {
 		parser := parser2.GetParser()
-		ast, _ := parser.ParseString("", string(content))
+		ast, err := parser.ParseString("", string(content))
+
+		if err != nil {
+			panic(err)
+		}
 
 		// todo tidy
 		machine := &machine2.Machine{Variables: map[string]*grammar.Value{}}
 
 		for _, st := range ast.TopDec {
-			machine.EvalTop(st)
+			res := machine.EvalTop(st)
+			if res != nil {
+				fmt.Println(res)
+			}
 		}
 
 		if sv.Verbose {

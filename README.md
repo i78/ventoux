@@ -29,3 +29,14 @@ greeting2
 greeting3
 pi
 ```
+
+Expressions:
+
+```ventoux
+firstFib = 3
+secondFib = 5
+thirdFib = firstFib + secondFib
+thirdFib
+20 - 1
+2 ^ 8
+```

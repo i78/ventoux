@@ -11,6 +11,7 @@ var (
 		{`String`, `"(?:\\.|[^"])*"`},
 		// {"Int", `\d+`},
 		{"Number", `[+-]?([0-9]*[.])?[0-9]+`},
+		{"Operator", `[-,()*/+%{};&!=:^]|>>|<<`},
 		{"Identifier", `[a-zA-Z0-9]+`},
 		{"comment", `//.*|/\*.*?\*/`},
 		{"Equals", `=`},
@@ -29,5 +30,5 @@ func GetParser() *participle.Parser[Program] {
 
 type Program struct {
 	Pos    lexer.Position
-	TopDec []*grammar.TopDec `@@*`
+	TopDec []*grammar.TopDec `parser:"@@*"`
 }
