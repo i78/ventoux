@@ -26,12 +26,12 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 		}
 
 		// todo tidy
-		machine := &machine2.Machine{Variables: map[string]*grammar.Value{}}
+		machine := &machine2.Machine{Variables: map[string]*grammar.Expression{}}
 
 		for _, st := range ast.TopDec {
 			res := machine.EvalTop(st)
 			if res != nil {
-				fmt.Println(res)
+				fmt.Println(res.ToString())
 			}
 		}
 

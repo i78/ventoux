@@ -6,36 +6,44 @@ import (
 )
 
 type Machine struct {
-	Variables map[string]*grammar.Value
+	Variables map[string]*grammar.Expression
 }
 
-func (machine *Machine) EvalTop(d *grammar.TopDec) interface{} {
+func (machine *Machine) EvalTop(d *grammar.TopDec) *grammar.Expression {
 	if d.Assign != nil {
 		return machine.EvalAssign(d.Assign)
 	} else if d.Expression != nil {
 		return machine.EvalExpr(d.Expression)
 	} else if d.ValueOrVariable != nil {
-		return machine.EvalValueOrVariable(d.ValueOrVariable)
+		//return machine.EvalValueOrVariable(d.ValueOrVariable)
+		return nil
 	}
 	return nil
 }
 
 func (machine *Machine) EvalValueOrVariable(e *grammar.ValueOrVariable) *grammar.Value {
-	if e.Value != nil {
+	fmt.Println("!WARN!!")
+	/*if e.Value != nil {
 		return e.Value
 	} else {
 		if e.VariableIdentifier != nil {
 			return machine.Variables[*e.VariableIdentifier]
 		}
-	}
-	panic("Unable to evaluate expression")
+	}*/
+	return nil
+	// panic("Unable to evaluate expression")
 }
 
 func (machine *Machine) EvalExpr(e *grammar.Expression) *grammar.Expression {
-	// fmt.Println(">>>", e)
-	if it, ok := e.X.(grammar.ExprString); ok {
-		fmt.Println(it.ToString())
+	// todo this does not feel right here.
+	if _, ok := e.X.(grammar.ExprString); ok {
+		// fmt.Println(it.ToString())
 		return e
+	} else if _, ok := e.X.(grammar.ExprNumber); ok {
+		return e
+	} else if ident, ok := e.X.(grammar.ExprIdent); ok {
+		// todo Lazy evaluation? Not bad. :)
+		return machine.Variables[ident.Name]
 	}
 
 	// left := machine.EvalValueOrVariable(e.Left).NumberValue
@@ -66,14 +74,14 @@ func (machine *Machine) EvalExpr(e *grammar.Expression) *grammar.Expression {
 	return nil
 }
 
-func (machine *Machine) EvalAssign(a *grammar.Assign) interface{} {
+func (machine *Machine) EvalAssign(a *grammar.Assign) *grammar.Expression {
 	/*var toAssign *grammar.Value
 	if a.ValueOrVariable != nil {
 		toAssign = machine.EvalValueOrVariable(a.ValueOrVariable)
 	} else if a.Expression != nil {
 		toAssign = machine.EvalExpr(a.Expression)
 	}
-
-	machine.Variables[a.Left] = toAssign*/
+	*/
+	machine.Variables[a.Left] = a.Expression
 	return nil
 }

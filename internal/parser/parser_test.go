@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"dreese.de/ventoux/internal/grammar"
 	"fmt"
 	"github.com/alecthomas/assert/v2"
 	"github.com/alecthomas/repr"
@@ -39,10 +40,10 @@ func TestLiteral(t *testing.T) {
 
 func TestAssign(t *testing.T) {
 	t.Run("Should return assign node on assign example", func(t *testing.T) {
-		const testdata = "greeting = \"Hello\"\n\"greeting\""
+		const testdata = "greeting = \"Hello\""
 		ast, err := parser.ParseString("", testdata)
 		repr.Println(ast)
-		// assert.Equal(t, "Hello", *ast.TopDec[0].Assign.ValueOrVariable.Value.StringValue)
+		assert.Equal(t, "Hello", ast.TopDec[0].Assign.Expression.X.(grammar.ExprString).Value)
 		assert.NoError(t, err)
 	})
 }
