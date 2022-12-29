@@ -2,7 +2,7 @@ package machine
 
 import (
 	"dreese.de/ventoux/internal/grammar"
-	"math"
+	"fmt"
 )
 
 type Machine struct {
@@ -31,43 +31,49 @@ func (machine *Machine) EvalValueOrVariable(e *grammar.ValueOrVariable) *grammar
 	panic("Unable to evaluate expression")
 }
 
-func (machine *Machine) EvalExpr(e *grammar.Expr) *grammar.Value {
-	left := machine.EvalValueOrVariable(e.Left).NumberValue
-	right := machine.EvalValueOrVariable(e.Right).NumberValue
-
-	var operationResult float64
-	switch e.Operator {
-	case "+":
-		operationResult = *left + *right
-	case "-":
-		operationResult = *left - *right
-	case "*":
-		operationResult = *left * *right
-	case "/":
-		operationResult = *left / *right
-	case "^":
-		operationResult = math.Pow(*left, *right)
-	case "%":
-		operationResult = float64(int(*left) % int(*right))
-	case "<<":
-		operationResult = float64(int(*left) << int(*right))
-	case ">>":
-		operationResult = float64(int(*left) >> int(*right))
+func (machine *Machine) EvalExpr(e *grammar.Expression) *grammar.Expression {
+	// fmt.Println(">>>", e)
+	if it, ok := e.X.(grammar.ExprString); ok {
+		fmt.Println(it.ToString())
+		return e
 	}
 
-	return &grammar.Value{
-		NumberValue: &operationResult,
-	}
+	// left := machine.EvalValueOrVariable(e.Left).NumberValue
+	// right := machine.EvalValueOrVariable(e.Left).NumberValue // todo
+	//right := machine.EvalValueOrVariable(e.Right).NumberValue
+	/*
+		var operationResult float64
+		//switch e.Operator {
+		switch "+" {
+		case "+":
+			operationResult = *left + *right
+		case "-":
+			operationResult = *left - *right
+		case "*":
+			operationResult = *left * *right
+		case "/":
+			operationResult = *left / *right
+		case "^":
+			operationResult = math.Pow(*left, *right)
+		case "%":
+			operationResult = float64(int(*left) % int(*right))
+		case "<<":
+			operationResult = float64(int(*left) << int(*right))
+		case ">>":
+			operationResult = float64(int(*left) >> int(*right))
+		}
+	*/
+	return nil
 }
 
 func (machine *Machine) EvalAssign(a *grammar.Assign) interface{} {
-	var toAssign *grammar.Value
+	/*var toAssign *grammar.Value
 	if a.ValueOrVariable != nil {
 		toAssign = machine.EvalValueOrVariable(a.ValueOrVariable)
 	} else if a.Expression != nil {
 		toAssign = machine.EvalExpr(a.Expression)
 	}
 
-	machine.Variables[a.Left] = toAssign
+	machine.Variables[a.Left] = toAssign*/
 	return nil
 }
