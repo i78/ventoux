@@ -4,5 +4,8 @@ secondFib = 5
 thirdFib = firstFib + secondFib
 thirdFib
 20 - 1 - 3
+20 - 2 * 10
+(20 - 2) * 10
 2 ^ 8
-//1 << 16
+1 << 16
+1 << 8 << 8

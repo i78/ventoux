@@ -2,6 +2,7 @@ package grammar
 
 import (
 	"fmt"
+	"math"
 )
 
 // todo this does not belong here.
@@ -49,6 +50,26 @@ type (
 		Expr ExprPrec3 `@@`
 	}
 
+	ExprPow struct {
+		Head ExprPrec3    `@@`
+		Tail []ExprPowExt `@@+`
+	}
+
+	ExprPowExt struct {
+		Op   string    `@("^" )`
+		Expr ExprPrec3 `@@`
+	}
+
+	ExprBitshift struct {
+		Head ExprPrec3         `@@`
+		Tail []ExprBitshiftExt `@@+`
+	}
+
+	ExprBitshiftExt struct {
+		Op   string    `@("<<" | ">>" )`
+		Expr ExprPrec3 `@@`
+	}
+
 	ExprRem struct {
 		Head ExprOperand  `@@`
 		Tail []ExprRemExt `@@+`
@@ -84,23 +105,27 @@ func (ExprUnary) exprPrec3()  {}
 func (ExprRem) exprPrec3()    {}
 
 // These expression types can be matched at precedence level 2
-func (ExprIdent) exprPrec2()  {}
-func (ExprNumber) exprPrec2() {}
-func (ExprString) exprPrec2() {}
-func (ExprParens) exprPrec2() {}
-func (ExprUnary) exprPrec2()  {}
-func (ExprRem) exprPrec2()    {}
-func (ExprMulDiv) exprPrec2() {}
+func (ExprIdent) exprPrec2()    {}
+func (ExprNumber) exprPrec2()   {}
+func (ExprString) exprPrec2()   {}
+func (ExprParens) exprPrec2()   {}
+func (ExprUnary) exprPrec2()    {}
+func (ExprRem) exprPrec2()      {}
+func (ExprMulDiv) exprPrec2()   {}
+func (ExprPow) exprPrec2()      {}
+func (ExprBitshift) exprPrec2() {}
 
 // These expression types can be matched at the minimum precedence level
-func (ExprIdent) exprPrecAll()  {}
-func (ExprNumber) exprPrecAll() {}
-func (ExprString) exprPrecAll() {}
-func (ExprParens) exprPrecAll() {}
-func (ExprUnary) exprPrecAll()  {}
-func (ExprRem) exprPrecAll()    {}
-func (ExprMulDiv) exprPrecAll() {}
-func (ExprAddSub) exprPrecAll() {}
+func (ExprIdent) exprPrecAll()    {}
+func (ExprNumber) exprPrecAll()   {}
+func (ExprString) exprPrecAll()   {}
+func (ExprParens) exprPrecAll()   {}
+func (ExprUnary) exprPrecAll()    {}
+func (ExprRem) exprPrecAll()      {}
+func (ExprMulDiv) exprPrecAll()   {}
+func (ExprPow) exprPrecAll()      {}
+func (ExprBitshift) exprPrecAll() {}
+func (ExprAddSub) exprPrecAll()   {}
 
 type Expression struct {
 	X ExprPrecAll `@@`
@@ -116,8 +141,6 @@ func (e *Expression) ToString() string {
 }
 
 func (eid ExprIdent) Evaluate(variables *Variables) *Expression {
-	// todo how lazy evaluation here? No access to machine.
-	// todo check exist
 	return (*variables)[eid.Name].Evaluate(variables)
 }
 
@@ -153,10 +176,6 @@ func (eas ExprAddSub) Evaluate(variables *Variables) *Expression {
 	for _, it := range eas.Tail {
 		var right float64
 		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-		/*
-			if it, isTerminal := it.Expr.(ExprTerminal); isTerminal {
-				right = it.Terminal()
-			}*/
 
 		switch it.Op {
 		case "+":
@@ -167,18 +186,67 @@ func (eas ExprAddSub) Evaluate(variables *Variables) *Expression {
 			operationResult *= right
 		case "/":
 			operationResult /= right
-			/*
-					operationResult = *left / *right
-				case "^":
-					operationResult = math.Pow(*left, *right)
-				case "%":
-					operationResult = float64(int(*left) % int(*right))
-				case "<<":
-					operationResult = float64(int(*left) << int(*right))
-				case ">>":
-					operationResult = float64(int(*left) >> int(*right))*/
+		case "%":
+			operationResult = float64(int(left) % int(right))
 		}
 	}
 
+	return &Expression{X: ExprNumber{Value: operationResult}}
+}
+
+func (eas ExprMulDiv) Evaluate(variables *Variables) *Expression {
+	var left float64
+
+	left = eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+	operationResult := left
+
+	for _, it := range eas.Tail {
+		var right float64
+		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+		switch it.Op {
+		case "*":
+			operationResult *= right
+		case "/":
+			operationResult /= right
+		}
+	}
+
+	return &Expression{X: ExprNumber{Value: operationResult}}
+}
+
+func (ep ExprParens) Evaluate(variables *Variables) *Expression {
+	return ep.Inner.(ExprEvaluatable).Evaluate(variables)
+}
+
+func (eas ExprBitshift) Evaluate(variables *Variables) *Expression {
+	operationResult := eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+	for _, it := range eas.Tail {
+		right := it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+		switch it.Op {
+		case "<<":
+			operationResult = float64(int(operationResult) << int(right))
+		case ">>":
+			operationResult = float64(int(operationResult) >> int(right))
+		}
+	}
+
+	return &Expression{X: ExprNumber{Value: operationResult}}
+}
+
+func (eas ExprPow) Evaluate(variables *Variables) *Expression {
+	operationResult := eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+	for _, it := range eas.Tail {
+		right := it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+		switch it.Op {
+		case "^":
+			operationResult = math.Pow(operationResult, right)
+		}
+	}
 	return &Expression{X: ExprNumber{Value: operationResult}}
 }
