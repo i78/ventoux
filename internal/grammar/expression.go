@@ -1,8 +1,12 @@
 package grammar
 
-import "fmt"
+import (
+	"fmt"
+)
 
-// ---
+// todo this does not belong here.
+type Variables = map[string]*Expression
+
 type (
 	ExprString struct {
 		Value string `@String`
@@ -59,12 +63,10 @@ type (
 	ExprPrec2   interface{ exprPrec2() }
 	ExprPrec3   interface{ exprPrec3() }
 	ExprOperand interface{ exprOperand() }
-)
 
-// essai
-func (s ExprString) ToString() string {
-	return s.Value
-}
+	ExprEvaluatable interface{ Evaluate(*Variables) *Expression }
+	ExprTerminal    interface{ Terminal() *Expression }
+)
 
 // These expression types can be matches as individual operands
 func (ExprIdent) exprOperand()  {}
@@ -111,4 +113,72 @@ func (e *Expression) ToString() string {
 		return fmt.Sprintf("%f", it.Value)
 	}
 	return ""
+}
+
+func (eid ExprIdent) Evaluate(variables *Variables) *Expression {
+	// todo how lazy evaluation here? No access to machine.
+	// todo check exist
+	return (*variables)[eid.Name].Evaluate(variables)
+}
+
+func (en ExprNumber) Terminal() *Expression {
+	return &Expression{X: en}
+}
+
+func (en ExprNumber) Evaluate(*Variables) *Expression {
+	return &Expression{X: en}
+}
+
+func (es ExprString) Evaluate(*Variables) *Expression {
+	return &Expression{X: es}
+}
+
+// todo type
+func (e Expression) Evaluate(variables *Variables) *Expression {
+	if it, isTerminal := e.X.(ExprTerminal); isTerminal {
+		return it.Terminal()
+	} else if it, isEvaluable := e.X.(ExprEvaluatable); isEvaluable {
+		return it.Evaluate(variables)
+	}
+	return nil
+}
+
+func (eas ExprAddSub) Evaluate(variables *Variables) *Expression {
+	var left float64
+
+	left = eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+
+	operationResult := left
+
+	for _, it := range eas.Tail {
+		var right float64
+		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
+		/*
+			if it, isTerminal := it.Expr.(ExprTerminal); isTerminal {
+				right = it.Terminal()
+			}*/
+
+		switch it.Op {
+		case "+":
+			operationResult += right
+		case "-":
+			operationResult -= right
+		case "*":
+			operationResult *= right
+		case "/":
+			operationResult /= right
+			/*
+					operationResult = *left / *right
+				case "^":
+					operationResult = math.Pow(*left, *right)
+				case "%":
+					operationResult = float64(int(*left) % int(*right))
+				case "<<":
+					operationResult = float64(int(*left) << int(*right))
+				case ">>":
+					operationResult = float64(int(*left) >> int(*right))*/
+		}
+	}
+
+	return &Expression{X: ExprNumber{Value: operationResult}}
 }

@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/alecthomas/kong"
+	"github.com/alecthomas/repr"
 	"log"
 	"os"
 )
 
 type RunCommand struct {
 	Sourcefile string `arg:"" optional:"" name:"path" help:"Paths to list." type:"path"`
+	PrintAst   bool
 	Verbose    bool
 }
 
@@ -23,6 +25,10 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 
 		if err != nil {
 			panic(err)
+		}
+
+		if sv.PrintAst {
+			repr.Print(ast)
 		}
 
 		// todo tidy
@@ -36,7 +42,7 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 		}
 
 		if sv.Verbose {
-			m, _ := json.Marshal(machine)
+			m, _ := json.MarshalIndent(machine, "", "  ")
 			fmt.Println("Machine Status: \n", string(m))
 		}
 	} else {
