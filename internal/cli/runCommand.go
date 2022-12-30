@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/alecthomas/kong"
+	"github.com/alecthomas/repr"
 	"log"
 	"os"
 )
 
 type RunCommand struct {
 	Sourcefile string `arg:"" optional:"" name:"path" help:"Paths to list." type:"path"`
+	PrintAst   bool
 	Verbose    bool
 }
 
@@ -25,18 +27,22 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 			panic(err)
 		}
 
+		if sv.PrintAst {
+			repr.Print(ast)
+		}
+
 		// todo tidy
-		machine := &machine2.Machine{Variables: map[string]*grammar.Value{}}
+		machine := &machine2.Machine{Variables: map[string]*grammar.Expression{}}
 
 		for _, st := range ast.TopDec {
 			res := machine.EvalTop(st)
 			if res != nil {
-				fmt.Println(res)
+				fmt.Println(res.ToString())
 			}
 		}
 
 		if sv.Verbose {
-			m, _ := json.Marshal(machine)
+			m, _ := json.MarshalIndent(machine, "", "  ")
 			fmt.Println("Machine Status: \n", string(m))
 		}
 	} else {

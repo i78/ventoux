@@ -8,28 +8,36 @@ import (
 type TopDec struct {
 	Pos             lexer.Position
 	Assign          *Assign          `parser:"@@"`
-	Expression      *Expr            `parser:"| @@"`
-	ValueOrVariable *ValueOrVariable `parser:"| @@"`
+	Expression      *Expression      `parser:"| @@"`
+	ValueOrVariable *ValueOrVariable // `parser:"| @@"`
 }
 
 type Operator string
 
 type Assign struct {
-	Pos             lexer.Position
-	Left            string           `parser:"@Identifier '='"`
-	Expression      *Expr            `parser:"[@@"`
-	ValueOrVariable *ValueOrVariable `parser:"| @@]"`
+	Pos        lexer.Position
+	Left       string      `parser:"@Ident '='"`
+	Expression *Expression `parser:"@@"`
+	//Expression      *Expression      `parser:"[@@"`
+	//ValueOrVariable *ValueOrVariable `parser:"| @@]"`
 	// Value      Value           `parser:"@@"`
 }
 
 type Expr struct {
-	Left     *ValueOrVariable `parser:"@@"`
+	Left *ValueOrVariable `parser:"@@"`
+	//Operator Operator         `parser:"@Operator"`
+	//Right    *ValueOrVariable `parser:"@@"`
+	Right []*OpTerm `parser:"@@*"`
+}
+
+type OpTerm struct {
 	Operator Operator         `parser:"@Operator"`
 	Right    *ValueOrVariable `parser:"@@"`
 }
 
+// todo is this a "Terminal"?
 type ValueOrVariable struct {
-	VariableIdentifier *string `parser:"@Identifier"`
+	VariableIdentifier *string `parser:"@Ident"`
 	Value              *Value  `parser:"| @@"`
 }
 
@@ -37,6 +45,7 @@ type Value struct {
 	//Pos         lexer.Position
 	StringValue *string `parser:"@String"`
 	//Float       *float64 `parser: "| @Float"`
+	// Bool TODO
 	NumberValue *float64 `parser:"| @Number"`
 }
 
