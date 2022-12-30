@@ -14,21 +14,18 @@ func TestEvalExpression(t *testing.T) {
 		ast, _ := parser.ParseString("", "8 + 16")
 		m := Machine{}
 		result := m.EvalExpr(ast.TopDec[0].Expression)
-		assert.Equal(t, 24, *result.NumberValue)
+		assert.Equal(t, 24, result.X.(grammar.ExprNumber).Value)
 	})
 
 	t.Run("should successfully add a constant and a variable value", func(t *testing.T) {
 		parser := parser2.GetParser()
-		a := 16.0
-		ast, _ := parser.ParseString("", "a + 8")
-		m := Machine{Variables: map[string]*grammar.Value{
-			"a": {
-				StringValue: nil,
-				NumberValue: &a,
-			},
-		}}
-		result := m.EvalExpr(ast.TopDec[0].Expression)
-		assert.Equal(t, 24, *result.NumberValue)
+		ast, _ := parser.ParseString("", "a=8\na + 8")
+		m := Machine{
+			grammar.Variables{},
+		}
+		m.EvalTop(ast.TopDec[0])
+		result := m.EvalExpr(ast.TopDec[1].Expression)
+		assert.Equal(t, 16, result.X.(grammar.ExprNumber).Value)
 	})
 
 }

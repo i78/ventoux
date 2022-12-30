@@ -21,20 +21,6 @@ func (machine *Machine) EvalTop(d *grammar.TopDec) *grammar.Expression {
 }
 
 func (machine *Machine) EvalExpr(e *grammar.Expression) *grammar.Expression {
-	// todo this does not feel right here.
-	/*
-		if _, ok := e.X.(grammar.ExprString); ok {
-			return e
-		} else if _, ok := e.X.(grammar.ExprNumber); ok {
-			return e
-		} else if _, ok := e.X.(grammar.ExprIdent); ok {
-			// todo Lazy evaluation? Not bad. :)
-			return e.Evaluate(&machine.Variables)
-		} else if eva, ok := e.X.(grammar.ExprEvaluatable); ok {
-			return eva.Evaluate(&machine.Variables)
-		}
-	*/
-	//	return nil
 	return e.Evaluate(&machine.Variables)
 }
 
