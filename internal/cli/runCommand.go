@@ -13,9 +13,10 @@ import (
 )
 
 type RunCommand struct {
-	Sourcefile string `arg:"" optional:"" name:"path" help:"Paths to list." type:"path"`
-	PrintAst   bool
-	Verbose    bool
+	Sourcefile                string `arg:"" optional:"" name:"path" help:"Path to Ventoux script to execute." type:"path"`
+	ExportVirtualMachineState string `optional:"" help:"Save the VM state to after program execution." type:"path"`
+	PrintAst                  bool   `help:"Print the abstract syntax tree of the given Ventoux script to stdout before running"`
+	Verbose                   bool   `help:"Provide additional information"`
 }
 
 func (sv *RunCommand) Run(ctx *kong.Context) error {
@@ -44,6 +45,13 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 		if sv.Verbose {
 			m, _ := json.MarshalIndent(machine, "", "  ")
 			fmt.Println("Machine Status: \n", string(m))
+		}
+
+		if sv.ExportVirtualMachineState != "" {
+			state := machine.ExportMachineState()
+			if err := os.WriteFile(sv.ExportVirtualMachineState, state, 0766); err != nil {
+				panic("Unable to persist virtual machine state!")
+			}
 		}
 	} else {
 		log.Fatal(err)

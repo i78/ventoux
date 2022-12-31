@@ -29,3 +29,19 @@ func TestEvalExpression(t *testing.T) {
 	})
 
 }
+
+func TestSaveVmState(t *testing.T) {
+	t.Run("should save even empty machine state when requested", func(t *testing.T) {
+		m := Machine{}
+		state := m.ExportMachineState()
+		assert.NotZero(t, state)
+	})
+
+	t.Run("should save machine state with variables when requested", func(t *testing.T) {
+		m := Machine{
+			map[string]*grammar.Expression{"dummy": {X: grammar.ExprString{Value: "hello!"}}},
+		}
+		state := m.ExportMachineState()
+		assert.NotZero(t, state)
+	})
+}
