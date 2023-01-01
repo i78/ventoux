@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"dreese.de/ventoux/internal/grammar"
 	machine2 "dreese.de/ventoux/internal/machine"
 	parser2 "dreese.de/ventoux/internal/parser"
 	"encoding/json"
@@ -32,15 +31,11 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 			repr.Print(ast)
 		}
 
-		// todo tidy
-		machine := &machine2.Machine{Variables: map[string]*grammar.Expression{}}
+		machine := machine2.NewMachine(func(s string) {
+			fmt.Println(s)
+		})
 
-		for _, st := range ast.TopDec {
-			res := machine.EvalTop(st)
-			if res != nil {
-				fmt.Println(res.ToString())
-			}
-		}
+		machine.EvalProgram(ast)
 
 		if sv.Verbose {
 			m, _ := json.MarshalIndent(machine, "", "  ")

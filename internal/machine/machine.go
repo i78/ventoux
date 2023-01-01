@@ -3,12 +3,31 @@ package machine
 import (
 	"bytes"
 	"dreese.de/ventoux/internal/grammar"
+	"dreese.de/ventoux/internal/parser"
 	"encoding/gob"
 	"log"
 )
 
+type ConsoleOutputFn = func(string)
+
 type Machine struct {
 	grammar.Variables
+	ConsoleOutputFn
+}
+
+func NewMachine(consoleOutputFn ConsoleOutputFn) *Machine {
+	return &Machine{Variables: map[string]*grammar.Expression{}, ConsoleOutputFn: consoleOutputFn}
+}
+
+func (machine *Machine) EvalProgram(program *parser.Program) *grammar.Expression {
+	for _, st := range program.TopDec {
+		res := machine.EvalTop(st)
+		if res != nil {
+			//fmt.Println(res.ToString())
+			machine.ConsoleOutputFn(res.ToString())
+		}
+	}
+	return nil
 }
 
 func (machine *Machine) EvalTop(d *grammar.TopDec) *grammar.Expression {
