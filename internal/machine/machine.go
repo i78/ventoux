@@ -51,6 +51,12 @@ func (machine *Machine) EvalAssign(a *grammar.Assign) *grammar.Expression {
 	return nil
 }
 
+/*
+func (machine *Machine) EvalFunction(fn *grammar.Function) *grammar.Expression {
+	//	machine.Variables[fn.FunctionName] = a
+	return nil
+}*/
+
 func (machine *Machine) ExportMachineState() []byte {
 	var buffer bytes.Buffer
 	withGobConfiguration()

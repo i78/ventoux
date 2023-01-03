@@ -6,10 +6,11 @@ import (
 )
 
 type TopDec struct {
-	Pos             lexer.Position
+	Pos lexer.Position
+	// Function        *Function        `parser:"@@"`
 	Assign          *Assign          `parser:"@@"`
 	Expression      *Expression      `parser:"| @@"`
-	ValueOrVariable *ValueOrVariable // `parser:"| @@"`
+	ValueOrVariable *ValueOrVariable // `parser:"| @@"` // todo weg
 }
 
 type Operator string
@@ -48,6 +49,14 @@ type Value struct {
 	// Bool TODO
 	NumberValue *float64 `parser:"| @Number"`
 }
+
+/*
+type Function struct {
+	Pos            lexer.Position
+	FunctionName   *string     `parser:"@Ident"`
+	ParameterNames *string     `parser:"@Ident '='"`
+	Expression     *Expression `parser:"@@';'"` // todo this must be lazy
+}*/
 
 func (v *Value) String() string {
 	if v.StringValue != nil {

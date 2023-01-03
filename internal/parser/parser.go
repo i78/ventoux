@@ -24,19 +24,23 @@ var (
 		participle.Lexer(lex),
 		participle.Unquote("String"),
 
-		participle.Union[grammar.ExprOperand](grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprOperand](grammar.ExprFunction{}, grammar.ExprFnCall{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
 		// Register the grammar.ExprPrec3 union so we can parse expressions at precedence level 3
-		participle.Union[grammar.ExprPrec3](grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprPrec3](grammar.ExprFnCall{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
 		// Register the grammar.ExprPrec2 union so we can parse expressions at precedence level 2
-		participle.Union[grammar.ExprPrec2](grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprPrec2](grammar.ExprFnCall{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
 		// Register the grammar.ExprPrecAll union so we can parse expressions at the minimum precedence level
-		participle.Union[grammar.ExprPrecAll](grammar.ExprAddSub{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprPrecAll](grammar.ExprFunction{}, grammar.ExprFnCall{}, grammar.ExprAddSub{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}, grammar.ExprFnCall{}),
 		participle.Elide("comment"),
 		participle.UseLookahead(99999))
 )
 
 func GetParser() *participle.Parser[Program] {
 	return parser
+}
+
+func ParseCode(source string) (*Program, error) {
+	return GetParser().ParseString("", source)
 }
 
 type Program struct {

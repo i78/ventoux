@@ -1,5 +1,4 @@
-hello = "Hello Ventoux!"
-say s = s
-
-hello
-say "Ventoux!"
+"Functions"
+say s = s;
+greeting = "Hello FnVentoux!"
+say (greeting)

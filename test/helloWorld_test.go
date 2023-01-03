@@ -1,4 +1,4 @@
-package _test
+package test
 
 import (
 	machine2 "dreese.de/ventoux/internal/machine"

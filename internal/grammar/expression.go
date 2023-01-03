@@ -80,21 +80,40 @@ type (
 		Expr ExprOperand `@@`
 	}
 
+	ExprFunction struct {
+		FunctionName   string      `parser:"@Ident"`
+		ParameterNames string      `parser:"@Ident '='"`
+		Expression     *Expression `parser:"@@';'"` // todo this must be lazy
+	}
+
+	ExprFnCall struct {
+		//FunctionName *ExprIdent      `@`
+		FunctionName string          `@Ident`
+		Tail         []ExprFnCallExt `@@`
+	}
+
+	ExprFnCallExt struct {
+		Expr ExprPrec3 `"("@@*")"`
+	}
+
 	ExprPrecAll interface{ exprPrecAll() }
 	ExprPrec2   interface{ exprPrec2() }
 	ExprPrec3   interface{ exprPrec3() }
 	ExprOperand interface{ exprOperand() }
+	//ExprFunctionCall interface{ exprFunctionCall() }
 
 	ExprEvaluatable interface{ Evaluate(*Variables) *Expression }
 	ExprTerminal    interface{ Terminal() *Expression }
 )
 
 // These expression types can be matches as individual operands
-func (ExprIdent) exprOperand()  {}
-func (ExprNumber) exprOperand() {}
-func (ExprString) exprOperand() {}
-func (ExprParens) exprOperand() {}
-func (ExprUnary) exprOperand()  {}
+func (ExprIdent) exprOperand()    {}
+func (ExprNumber) exprOperand()   {}
+func (ExprString) exprOperand()   {}
+func (ExprParens) exprOperand()   {}
+func (ExprUnary) exprOperand()    {}
+func (ExprFnCall) exprOperand()   {}
+func (ExprFunction) exprOperand() {}
 
 // These expression types can be matched at precedence level 3
 func (ExprIdent) exprPrec3()  {}
@@ -103,6 +122,7 @@ func (ExprString) exprPrec3() {}
 func (ExprParens) exprPrec3() {}
 func (ExprUnary) exprPrec3()  {}
 func (ExprRem) exprPrec3()    {}
+func (ExprFnCall) exprPrec3() {}
 
 // These expression types can be matched at precedence level 2
 func (ExprIdent) exprPrec2()    {}
@@ -114,6 +134,7 @@ func (ExprRem) exprPrec2()      {}
 func (ExprMulDiv) exprPrec2()   {}
 func (ExprPow) exprPrec2()      {}
 func (ExprBitshift) exprPrec2() {}
+func (ExprFnCall) exprPrec2()   {}
 
 // These expression types can be matched at the minimum precedence level
 func (ExprIdent) exprPrecAll()    {}
@@ -126,6 +147,8 @@ func (ExprMulDiv) exprPrecAll()   {}
 func (ExprPow) exprPrecAll()      {}
 func (ExprBitshift) exprPrecAll() {}
 func (ExprAddSub) exprPrecAll()   {}
+func (ExprFnCall) exprPrecAll()   {}
+func (ExprFunction) exprPrecAll() {}
 
 type Expression struct {
 	X ExprPrecAll `@@`
@@ -141,7 +164,11 @@ func (e *Expression) ToString() string {
 }
 
 func (eid ExprIdent) Evaluate(variables *Variables) *Expression {
-	return (*variables)[eid.Name].Evaluate(variables)
+	if it, exists := (*variables)[eid.Name]; exists {
+		return it.Evaluate(variables)
+	}
+	// Else, return lazy lets talk about it.
+	return &Expression{X: eid}
 }
 
 func (en ExprNumber) Terminal() *Expression {
@@ -218,6 +245,18 @@ func (eas ExprMulDiv) Evaluate(variables *Variables) *Expression {
 
 func (ep ExprParens) Evaluate(variables *Variables) *Expression {
 	return ep.Inner.(ExprEvaluatable).Evaluate(variables)
+}
+
+func (efn ExprFunction) Evaluate(variables *Variables) *Expression {
+	(*variables)[efn.FunctionName] = &Expression{X: efn}
+	return nil
+}
+
+func (efc ExprFnCall) Evaluate(variables *Variables) *Expression {
+	if _, exists := (*variables)[efc.FunctionName]; exists {
+		fmt.Println("ALIFE")
+	}
+	return nil
 }
 
 func (eas ExprBitshift) Evaluate(variables *Variables) *Expression {
