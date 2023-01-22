@@ -12,13 +12,13 @@ $ ventoux run hello.vx
 
 Hello World
 
-```ventoux
+```haskell
 "Hello World!"
 ```
 
 Variables
 
-```ventoux
+```haskell
 greeting = "Hello"
 greeting2 = "This really works!"
 greeting3 = greeting2
@@ -32,11 +32,19 @@ pi
 
 Expressions:
 
-```ventoux
+```haskell
 firstFib = 3
 secondFib = 5
 thirdFib = firstFib + secondFib
 thirdFib
 20 - 1
 2 ^ 8
+```
+
+Functions:
+
+```haskell
+say s = s;
+greeting = "Hello FnVentoux!"
+say (greeting)
 ```
