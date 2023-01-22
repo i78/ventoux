@@ -1,4 +1,3 @@
-"Functions"
 say s = s;
 greeting = "Hello FnVentoux!"
 say (greeting)
