@@ -36,7 +36,6 @@ func (machine *Machine) EvalTop(d *grammar.TopDec) *grammar.Expression {
 	} else if d.Expression != nil {
 		return machine.EvalExpr(d.Expression)
 	} else if d.ValueOrVariable != nil {
-		//return machine.EvalValueOrVariable(d.ValueOrVariable)
 		return nil
 	}
 	return nil

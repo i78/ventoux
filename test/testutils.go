@@ -9,11 +9,13 @@ import (
 	"testing"
 )
 
-func machineWithStdoutCapture() (string, *machine2.Machine) {
+func machineWithStdoutCapture() (*string, *machine2.Machine) {
 	tapped := ""
-	tap := func(s string) { tapped = fmt.Sprintf("%s%s", tapped, s) }
+	tap := func(s string) {
+		tapped = fmt.Sprintf("%s%s", tapped, s)
+	}
 	machine := machine2.NewMachine(tap)
-	return tapped, machine
+	return &tapped, machine
 }
 
 func readOrPanic(t *testing.T, filename string) *parser.Program {

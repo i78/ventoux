@@ -93,7 +93,8 @@ type (
 	}
 
 	ExprFnCallExt struct {
-		Expr ExprPrec3 `"("@@*")"`
+		//Expr ExprPrec3 `"("@@*")"`
+		Expr *Expression `"("@@*")"`
 	}
 
 	ExprPrecAll interface{ exprPrecAll() }
@@ -249,12 +250,26 @@ func (ep ExprParens) Evaluate(variables *Variables) *Expression {
 
 func (efn ExprFunction) Evaluate(variables *Variables) *Expression {
 	(*variables)[efn.FunctionName] = &Expression{X: efn}
-	return nil
+	return efn.Expression.Evaluate(variables) // todo no globals, own call context
+}
+
+func (efe ExprFnCallExt) Evaluate(variables *Variables) *Expression {
+	return efe.Expr
 }
 
 func (efc ExprFnCall) Evaluate(variables *Variables) *Expression {
-	if _, exists := (*variables)[efc.FunctionName]; exists {
-		fmt.Println("ALIFE")
+	if fn, exists := (*variables)[efc.FunctionName]; exists {
+		/* TODO LATER
+		for _, k := range fn.X.(ExprFunction).ParameterNames {
+			fmt.Println(k)
+		}*/
+
+		localVariables := Variables{
+			fn.X.(ExprFunction).ParameterNames: efc.Tail[0].Evaluate(variables),
+		}
+
+		res := fn.Evaluate(&localVariables)
+		return res.Evaluate(variables)
 	}
 	return nil
 }
