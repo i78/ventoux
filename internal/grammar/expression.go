@@ -9,73 +9,73 @@ type Variables = map[string]*Expression
 
 type (
 	ExprString struct {
-		Value string `@String`
+		Value string `parser:"@String"`
 	}
 
 	ExprNumber struct {
-		Value float64 `@Int | @Float`
+		Value float64 `parser:"@Int | @Float"`
 	}
 
 	ExprIdent struct {
-		Name string `@Ident`
+		Name string `parser:"@Ident"`
 	}
 
 	ExprParens struct {
-		Inner ExprPrecAll `"(" @@ ")"`
+		Inner ExprPrecAll `parser:"'(' @@ ')'"`
 	}
 
 	ExprUnary struct {
-		Op   string      `@("-" | "!")`
+		Op   string      `parser:"@('-' | '!')"`
 		Expr ExprOperand `parser:"@@"`
 	}
 
 	ExprAddSub struct {
 		Head ExprPrec2       `parser:"@@"`
-		Tail []ExprAddSubExt `@@+`
+		Tail []ExprAddSubExt `parser:"@@+"`
 	}
 
 	ExprAddSubExt struct {
-		Op   string    `@("+" | "-")`
+		Op   string    `parser:"@('+' | '-')"`
 		Expr ExprPrec2 `parser:"@@"`
 	}
 
 	ExprMulDiv struct {
 		Head ExprPrec3       `parser:"@@"`
-		Tail []ExprMulDivExt `@@+`
+		Tail []ExprMulDivExt `parser:"@@+"`
 	}
 
 	ExprMulDivExt struct {
-		Op   string    `@("*" | "/")`
+		Op   string    `parser:"@('*' | '/')"`
 		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprPow struct {
 		Head ExprPrec3    `parser:"@@"`
-		Tail []ExprPowExt `@@+`
+		Tail []ExprPowExt `parser:"@@+"`
 	}
 
 	ExprPowExt struct {
-		Op   string    `@("^" )`
+		Op   string    `parser:"@('^' )"`
 		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprBitshift struct {
 		Head ExprPrec3         `parser:"@@"`
-		Tail []ExprBitshiftExt `@@+`
+		Tail []ExprBitshiftExt `parser:"@@+"`
 	}
 
 	ExprBitshiftExt struct {
-		Op   string    `@("<<" | ">>" )`
+		Op   string    `parser:"@('<<' | '>>' )"`
 		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprRem struct {
 		Head ExprOperand  `parser:"@@"`
-		Tail []ExprRemExt `@@+`
+		Tail []ExprRemExt `parser:"@@+"`
 	}
 
 	ExprRemExt struct {
-		Op   string      `@"%"`
+		Op   string      `parser:"@'%'"`
 		Expr ExprOperand `parser:"@@"`
 	}
 
@@ -86,14 +86,12 @@ type (
 	}
 
 	ExprFnCall struct {
-		//FunctionName *ExprIdent      `@`
-		FunctionName string          `parser:"@Ident""`
-		Tail         []ExprFnCallExt `"("@@*")"`
+		FunctionName string          `parser:"@Ident"`
+		Tail         []ExprFnCallExt `parser:"'('@@*')'"`
 	}
 
 	ExprFnCallExt struct {
-		//Expr ExprPrec3 `"("@@*")"`
-		Expr Expression `@@`
+		Expr Expression `parser:"@@"`
 	}
 
 	ExprPrecAll interface{ exprPrecAll() }
