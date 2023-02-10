@@ -1,0 +1,5 @@
+# IDE files
+/.idea/
+
+# Ventoux binary machine context
+*.vxcontext

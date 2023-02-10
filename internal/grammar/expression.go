@@ -2,7 +2,6 @@ package grammar
 
 import (
 	"fmt"
-	"math"
 )
 
 // todo this does not belong here.
@@ -27,74 +26,74 @@ type (
 
 	ExprUnary struct {
 		Op   string      `@("-" | "!")`
-		Expr ExprOperand `@@`
+		Expr ExprOperand `parser:"@@"`
 	}
 
 	ExprAddSub struct {
-		Head ExprPrec2       `@@`
+		Head ExprPrec2       `parser:"@@"`
 		Tail []ExprAddSubExt `@@+`
 	}
 
 	ExprAddSubExt struct {
 		Op   string    `@("+" | "-")`
-		Expr ExprPrec2 `@@`
+		Expr ExprPrec2 `parser:"@@"`
 	}
 
 	ExprMulDiv struct {
-		Head ExprPrec3       `@@`
+		Head ExprPrec3       `parser:"@@"`
 		Tail []ExprMulDivExt `@@+`
 	}
 
 	ExprMulDivExt struct {
 		Op   string    `@("*" | "/")`
-		Expr ExprPrec3 `@@`
+		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprPow struct {
-		Head ExprPrec3    `@@`
+		Head ExprPrec3    `parser:"@@"`
 		Tail []ExprPowExt `@@+`
 	}
 
 	ExprPowExt struct {
 		Op   string    `@("^" )`
-		Expr ExprPrec3 `@@`
+		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprBitshift struct {
-		Head ExprPrec3         `@@`
+		Head ExprPrec3         `parser:"@@"`
 		Tail []ExprBitshiftExt `@@+`
 	}
 
 	ExprBitshiftExt struct {
 		Op   string    `@("<<" | ">>" )`
-		Expr ExprPrec3 `@@`
+		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprRem struct {
-		Head ExprOperand  `@@`
+		Head ExprOperand  `parser:"@@"`
 		Tail []ExprRemExt `@@+`
 	}
 
 	ExprRemExt struct {
 		Op   string      `@"%"`
-		Expr ExprOperand `@@`
+		Expr ExprOperand `parser:"@@"`
 	}
 
 	ExprFunction struct {
 		FunctionName   string      `parser:"@Ident"`
-		ParameterNames string      `parser:"@Ident '='"`
+		ParameterNames []string    `parser:"@Ident* '='"`
 		Expression     *Expression `parser:"@@';'"` // todo this must be lazy
 	}
 
 	ExprFnCall struct {
 		//FunctionName *ExprIdent      `@`
-		FunctionName string          `@Ident`
-		Tail         []ExprFnCallExt `@@`
+		FunctionName string          `parser:"@Ident""`
+		Tail         []ExprFnCallExt `"("@@*")"`
 	}
 
 	ExprFnCallExt struct {
 		//Expr ExprPrec3 `"("@@*")"`
-		Expr *Expression `"("@@*")"`
+		Expr Expression `@@`
 	}
 
 	ExprPrecAll interface{ exprPrecAll() }
@@ -194,113 +193,6 @@ func (e Expression) Evaluate(variables *Variables) *Expression {
 	return nil
 }
 
-func (eas ExprAddSub) Evaluate(variables *Variables) *Expression {
-	var left float64
-
-	left = eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	operationResult := left
-
-	for _, it := range eas.Tail {
-		var right float64
-		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "+":
-			operationResult += right
-		case "-":
-			operationResult -= right
-		case "*":
-			operationResult *= right
-		case "/":
-			operationResult /= right
-		case "%":
-			operationResult = float64(int(left) % int(right))
-		}
-	}
-
-	return &Expression{X: ExprNumber{Value: operationResult}}
-}
-
-func (eas ExprMulDiv) Evaluate(variables *Variables) *Expression {
-	var left float64
-
-	left = eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	operationResult := left
-
-	for _, it := range eas.Tail {
-		var right float64
-		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "*":
-			operationResult *= right
-		case "/":
-			operationResult /= right
-		}
-	}
-
-	return &Expression{X: ExprNumber{Value: operationResult}}
-}
-
 func (ep ExprParens) Evaluate(variables *Variables) *Expression {
 	return ep.Inner.(ExprEvaluatable).Evaluate(variables)
-}
-
-func (efn ExprFunction) Evaluate(variables *Variables) *Expression {
-	(*variables)[efn.FunctionName] = &Expression{X: efn}
-	return efn.Expression.Evaluate(variables) // todo no globals, own call context
-}
-
-func (efe ExprFnCallExt) Evaluate(variables *Variables) *Expression {
-	return efe.Expr
-}
-
-func (efc ExprFnCall) Evaluate(variables *Variables) *Expression {
-	if fn, exists := (*variables)[efc.FunctionName]; exists {
-		/* TODO LATER
-		for _, k := range fn.X.(ExprFunction).ParameterNames {
-			fmt.Println(k)
-		}*/
-
-		localVariables := Variables{
-			fn.X.(ExprFunction).ParameterNames: efc.Tail[0].Evaluate(variables),
-		}
-
-		res := fn.Evaluate(&localVariables)
-		return res.Evaluate(variables)
-	}
-	return nil
-}
-
-func (eas ExprBitshift) Evaluate(variables *Variables) *Expression {
-	operationResult := eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	for _, it := range eas.Tail {
-		right := it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "<<":
-			operationResult = float64(int(operationResult) << int(right))
-		case ">>":
-			operationResult = float64(int(operationResult) >> int(right))
-		}
-	}
-
-	return &Expression{X: ExprNumber{Value: operationResult}}
-}
-
-func (eas ExprPow) Evaluate(variables *Variables) *Expression {
-	operationResult := eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	for _, it := range eas.Tail {
-		right := it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "^":
-			operationResult = math.Pow(operationResult, right)
-		}
-	}
-	return &Expression{X: ExprNumber{Value: operationResult}}
 }

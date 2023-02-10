@@ -50,14 +50,6 @@ type Value struct {
 	NumberValue *float64 `parser:"| @Number"`
 }
 
-/*
-type Function struct {
-	Pos            lexer.Position
-	FunctionName   *string     `parser:"@Ident"`
-	ParameterNames *string     `parser:"@Ident '='"`
-	Expression     *Expression `parser:"@@';'"` // todo this must be lazy
-}*/
-
 func (v *Value) String() string {
 	if v.StringValue != nil {
 		return *v.StringValue

@@ -12,4 +12,11 @@ func TestFunctions(t *testing.T) {
 		machine.EvalProgram(ast)
 		assert.Equal(t, "Hello FnVentoux!", *captured)
 	})
+
+	t.Run("Should return expected result for adder function", func(t *testing.T) {
+		ast := readOrPanic(t, "../examples/functions/adder_fn.vx")
+		captured, machine := machineWithStdoutCapture()
+		machine.EvalProgram(ast)
+		assert.Equal(t, "10.000000", *captured)
+	})
 }
