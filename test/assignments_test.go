@@ -1,4 +1,4 @@
-package test
+package _test
 
 import (
 	machine2 "dreese.de/ventoux/internal/machine"
@@ -9,8 +9,8 @@ import (
 	"testing"
 )
 
-func TestHelloWorld(t *testing.T) {
-	if source, err := os.ReadFile("../examples/hello/hello.vx"); err == nil {
+func TestAssignments(t *testing.T) {
+	if source, err := os.ReadFile("../examples/assign/assign.vx"); err == nil {
 		ast, err := parser.GetParser().ParseString("", string(source))
 		assert.NoError(t, err)
 		tapped := ""
@@ -19,7 +19,7 @@ func TestHelloWorld(t *testing.T) {
 
 		machine.EvalProgram(ast)
 
-		assert.Equal(t, "Hello Ventoux!This is great!42.000000", tapped)
+		assert.Equal(t, "Hello Variables!################HelloThis really works!This really works!3.141592", tapped)
 	} else {
 		t.Fatal("Unable to load source file")
 	}

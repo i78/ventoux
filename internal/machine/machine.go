@@ -36,7 +36,6 @@ func (machine *Machine) EvalTop(d *grammar.TopDec) *grammar.Expression {
 	} else if d.Expression != nil {
 		return machine.EvalExpr(d.Expression)
 	} else if d.ValueOrVariable != nil {
-		//return machine.EvalValueOrVariable(d.ValueOrVariable)
 		return nil
 	}
 	return nil
@@ -50,6 +49,12 @@ func (machine *Machine) EvalAssign(a *grammar.Assign) *grammar.Expression {
 	machine.Variables[a.Left] = a.Expression
 	return nil
 }
+
+/*
+func (machine *Machine) EvalFunction(fn *grammar.Function) *grammar.Expression {
+	//	machine.Variables[fn.FunctionName] = a
+	return nil
+}*/
 
 func (machine *Machine) ExportMachineState() []byte {
 	var buffer bytes.Buffer

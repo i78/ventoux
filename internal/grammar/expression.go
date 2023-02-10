@@ -2,7 +2,6 @@ package grammar
 
 import (
 	"fmt"
-	"math"
 )
 
 // todo this does not belong here.
@@ -10,91 +9,109 @@ type Variables = map[string]*Expression
 
 type (
 	ExprString struct {
-		Value string `@String`
+		Value string `parser:"@String"`
 	}
 
 	ExprNumber struct {
-		Value float64 `@Int | @Float`
+		Value float64 `parser:"@Int | @Float"`
 	}
 
 	ExprIdent struct {
-		Name string `@Ident`
+		Name string `parser:"@Ident"`
 	}
 
 	ExprParens struct {
-		Inner ExprPrecAll `"(" @@ ")"`
+		Inner ExprPrecAll `parser:"'(' @@ ')'"`
 	}
 
 	ExprUnary struct {
-		Op   string      `@("-" | "!")`
-		Expr ExprOperand `@@`
+		Op   string      `parser:"@('-' | '!')"`
+		Expr ExprOperand `parser:"@@"`
 	}
 
 	ExprAddSub struct {
-		Head ExprPrec2       `@@`
-		Tail []ExprAddSubExt `@@+`
+		Head ExprPrec2       `parser:"@@"`
+		Tail []ExprAddSubExt `parser:"@@+"`
 	}
 
 	ExprAddSubExt struct {
-		Op   string    `@("+" | "-")`
-		Expr ExprPrec2 `@@`
+		Op   string    `parser:"@('+' | '-')"`
+		Expr ExprPrec2 `parser:"@@"`
 	}
 
 	ExprMulDiv struct {
-		Head ExprPrec3       `@@`
-		Tail []ExprMulDivExt `@@+`
+		Head ExprPrec3       `parser:"@@"`
+		Tail []ExprMulDivExt `parser:"@@+"`
 	}
 
 	ExprMulDivExt struct {
-		Op   string    `@("*" | "/")`
-		Expr ExprPrec3 `@@`
+		Op   string    `parser:"@('*' | '/')"`
+		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprPow struct {
-		Head ExprPrec3    `@@`
-		Tail []ExprPowExt `@@+`
+		Head ExprPrec3    `parser:"@@"`
+		Tail []ExprPowExt `parser:"@@+"`
 	}
 
 	ExprPowExt struct {
-		Op   string    `@("^" )`
-		Expr ExprPrec3 `@@`
+		Op   string    `parser:"@('^' )"`
+		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprBitshift struct {
-		Head ExprPrec3         `@@`
-		Tail []ExprBitshiftExt `@@+`
+		Head ExprPrec3         `parser:"@@"`
+		Tail []ExprBitshiftExt `parser:"@@+"`
 	}
 
 	ExprBitshiftExt struct {
-		Op   string    `@("<<" | ">>" )`
-		Expr ExprPrec3 `@@`
+		Op   string    `parser:"@('<<' | '>>' )"`
+		Expr ExprPrec3 `parser:"@@"`
 	}
 
 	ExprRem struct {
-		Head ExprOperand  `@@`
-		Tail []ExprRemExt `@@+`
+		Head ExprOperand  `parser:"@@"`
+		Tail []ExprRemExt `parser:"@@+"`
 	}
 
 	ExprRemExt struct {
-		Op   string      `@"%"`
-		Expr ExprOperand `@@`
+		Op   string      `parser:"@'%'"`
+		Expr ExprOperand `parser:"@@"`
+	}
+
+	ExprFunction struct {
+		FunctionName   string      `parser:"@Ident"`
+		ParameterNames []string    `parser:"@Ident* '='"`
+		Expression     *Expression `parser:"@@';'"` // todo this must be lazy
+	}
+
+	ExprFnCall struct {
+		FunctionName string          `parser:"@Ident"`
+		Tail         []ExprFnCallExt `parser:"'('@@*')'"`
+	}
+
+	ExprFnCallExt struct {
+		Expr Expression `parser:"@@"`
 	}
 
 	ExprPrecAll interface{ exprPrecAll() }
 	ExprPrec2   interface{ exprPrec2() }
 	ExprPrec3   interface{ exprPrec3() }
 	ExprOperand interface{ exprOperand() }
+	//ExprFunctionCall interface{ exprFunctionCall() }
 
 	ExprEvaluatable interface{ Evaluate(*Variables) *Expression }
 	ExprTerminal    interface{ Terminal() *Expression }
 )
 
 // These expression types can be matches as individual operands
-func (ExprIdent) exprOperand()  {}
-func (ExprNumber) exprOperand() {}
-func (ExprString) exprOperand() {}
-func (ExprParens) exprOperand() {}
-func (ExprUnary) exprOperand()  {}
+func (ExprIdent) exprOperand()    {}
+func (ExprNumber) exprOperand()   {}
+func (ExprString) exprOperand()   {}
+func (ExprParens) exprOperand()   {}
+func (ExprUnary) exprOperand()    {}
+func (ExprFnCall) exprOperand()   {}
+func (ExprFunction) exprOperand() {}
 
 // These expression types can be matched at precedence level 3
 func (ExprIdent) exprPrec3()  {}
@@ -103,6 +120,7 @@ func (ExprString) exprPrec3() {}
 func (ExprParens) exprPrec3() {}
 func (ExprUnary) exprPrec3()  {}
 func (ExprRem) exprPrec3()    {}
+func (ExprFnCall) exprPrec3() {}
 
 // These expression types can be matched at precedence level 2
 func (ExprIdent) exprPrec2()    {}
@@ -114,6 +132,7 @@ func (ExprRem) exprPrec2()      {}
 func (ExprMulDiv) exprPrec2()   {}
 func (ExprPow) exprPrec2()      {}
 func (ExprBitshift) exprPrec2() {}
+func (ExprFnCall) exprPrec2()   {}
 
 // These expression types can be matched at the minimum precedence level
 func (ExprIdent) exprPrecAll()    {}
@@ -126,6 +145,8 @@ func (ExprMulDiv) exprPrecAll()   {}
 func (ExprPow) exprPrecAll()      {}
 func (ExprBitshift) exprPrecAll() {}
 func (ExprAddSub) exprPrecAll()   {}
+func (ExprFnCall) exprPrecAll()   {}
+func (ExprFunction) exprPrecAll() {}
 
 type Expression struct {
 	X ExprPrecAll `@@`
@@ -141,7 +162,11 @@ func (e *Expression) ToString() string {
 }
 
 func (eid ExprIdent) Evaluate(variables *Variables) *Expression {
-	return (*variables)[eid.Name].Evaluate(variables)
+	if it, exists := (*variables)[eid.Name]; exists {
+		return it.Evaluate(variables)
+	}
+	// Else, return lazy lets talk about it.
+	return &Expression{X: eid}
 }
 
 func (en ExprNumber) Terminal() *Expression {
@@ -166,87 +191,6 @@ func (e Expression) Evaluate(variables *Variables) *Expression {
 	return nil
 }
 
-func (eas ExprAddSub) Evaluate(variables *Variables) *Expression {
-	var left float64
-
-	left = eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	operationResult := left
-
-	for _, it := range eas.Tail {
-		var right float64
-		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "+":
-			operationResult += right
-		case "-":
-			operationResult -= right
-		case "*":
-			operationResult *= right
-		case "/":
-			operationResult /= right
-		case "%":
-			operationResult = float64(int(left) % int(right))
-		}
-	}
-
-	return &Expression{X: ExprNumber{Value: operationResult}}
-}
-
-func (eas ExprMulDiv) Evaluate(variables *Variables) *Expression {
-	var left float64
-
-	left = eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	operationResult := left
-
-	for _, it := range eas.Tail {
-		var right float64
-		right = it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "*":
-			operationResult *= right
-		case "/":
-			operationResult /= right
-		}
-	}
-
-	return &Expression{X: ExprNumber{Value: operationResult}}
-}
-
 func (ep ExprParens) Evaluate(variables *Variables) *Expression {
 	return ep.Inner.(ExprEvaluatable).Evaluate(variables)
-}
-
-func (eas ExprBitshift) Evaluate(variables *Variables) *Expression {
-	operationResult := eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	for _, it := range eas.Tail {
-		right := it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "<<":
-			operationResult = float64(int(operationResult) << int(right))
-		case ">>":
-			operationResult = float64(int(operationResult) >> int(right))
-		}
-	}
-
-	return &Expression{X: ExprNumber{Value: operationResult}}
-}
-
-func (eas ExprPow) Evaluate(variables *Variables) *Expression {
-	operationResult := eas.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-	for _, it := range eas.Tail {
-		right := it.Expr.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
-
-		switch it.Op {
-		case "^":
-			operationResult = math.Pow(operationResult, right)
-		}
-	}
-	return &Expression{X: ExprNumber{Value: operationResult}}
 }

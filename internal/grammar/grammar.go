@@ -6,10 +6,11 @@ import (
 )
 
 type TopDec struct {
-	Pos             lexer.Position
+	Pos lexer.Position
+	// Function        *Function        `parser:"@@"`
 	Assign          *Assign          `parser:"@@"`
 	Expression      *Expression      `parser:"| @@"`
-	ValueOrVariable *ValueOrVariable // `parser:"| @@"`
+	ValueOrVariable *ValueOrVariable // `parser:"| @@"` // todo weg
 }
 
 type Operator string
