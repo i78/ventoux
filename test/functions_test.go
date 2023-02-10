@@ -26,4 +26,11 @@ func TestFunctions(t *testing.T) {
 		machine.EvalProgram(ast)
 		assert.Equal(t, "20.000000", *captured)
 	})
+
+	t.Run("Should return expected result for curried adder function", func(t *testing.T) {
+		ast := readOrPanic(t, "../examples/functions/adder_fn_curried.vx")
+		captured, machine := machineWithStdoutCapture()
+		machine.EvalProgram(ast)
+		assert.Equal(t, "43.000000", *captured)
+	})
 }
