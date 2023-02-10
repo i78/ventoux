@@ -1,0 +1,3 @@
+add a b =  a + b;
+ten = add (7 3)
+add(ten ten)

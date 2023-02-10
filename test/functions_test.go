@@ -19,4 +19,11 @@ func TestFunctions(t *testing.T) {
 		machine.EvalProgram(ast)
 		assert.Equal(t, "10.000000", *captured)
 	})
+
+	t.Run("Should return expected result for nested adder function", func(t *testing.T) {
+		ast := readOrPanic(t, "../examples/functions/adder_fn_nested.vx")
+		captured, machine := machineWithStdoutCapture()
+		machine.EvalProgram(ast)
+		assert.Equal(t, "20.000000", *captured)
+	})
 }
