@@ -16,6 +16,10 @@ type (
 		Value float64 `parser:"@Int | @Float"`
 	}
 
+	ExprBoolean struct {
+		Value bool `parser:"@Boolean"`
+	}
+
 	ExprIdent struct {
 		Name string `parser:"@Ident"`
 	}
@@ -107,6 +111,7 @@ type (
 // These expression types can be matches as individual operands
 func (ExprIdent) exprOperand()    {}
 func (ExprNumber) exprOperand()   {}
+func (ExprBoolean) exprOperand()  {}
 func (ExprString) exprOperand()   {}
 func (ExprParens) exprOperand()   {}
 func (ExprUnary) exprOperand()    {}
@@ -114,17 +119,19 @@ func (ExprFnCall) exprOperand()   {}
 func (ExprFunction) exprOperand() {}
 
 // These expression types can be matched at precedence level 3
-func (ExprIdent) exprPrec3()  {}
-func (ExprNumber) exprPrec3() {}
-func (ExprString) exprPrec3() {}
-func (ExprParens) exprPrec3() {}
-func (ExprUnary) exprPrec3()  {}
-func (ExprRem) exprPrec3()    {}
-func (ExprFnCall) exprPrec3() {}
+func (ExprIdent) exprPrec3()   {}
+func (ExprNumber) exprPrec3()  {}
+func (ExprBoolean) exprPrec3() {}
+func (ExprString) exprPrec3()  {}
+func (ExprParens) exprPrec3()  {}
+func (ExprUnary) exprPrec3()   {}
+func (ExprRem) exprPrec3()     {}
+func (ExprFnCall) exprPrec3()  {}
 
 // These expression types can be matched at precedence level 2
 func (ExprIdent) exprPrec2()    {}
 func (ExprNumber) exprPrec2()   {}
+func (ExprBoolean) exprPrec2()  {}
 func (ExprString) exprPrec2()   {}
 func (ExprParens) exprPrec2()   {}
 func (ExprUnary) exprPrec2()    {}
@@ -137,6 +144,7 @@ func (ExprFnCall) exprPrec2()   {}
 // These expression types can be matched at the minimum precedence level
 func (ExprIdent) exprPrecAll()    {}
 func (ExprNumber) exprPrecAll()   {}
+func (ExprBoolean) exprPrecAll()  {}
 func (ExprString) exprPrecAll()   {}
 func (ExprParens) exprPrecAll()   {}
 func (ExprUnary) exprPrecAll()    {}
@@ -174,6 +182,10 @@ func (en ExprNumber) Terminal() *Expression {
 }
 
 func (en ExprNumber) Evaluate(*Variables) *Expression {
+	return &Expression{X: en}
+}
+
+func (en ExprBoolean) Terminal() *Expression {
 	return &Expression{X: en}
 }
 

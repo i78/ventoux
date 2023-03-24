@@ -6,11 +6,9 @@ import (
 )
 
 type TopDec struct {
-	Pos lexer.Position
-	// Function        *Function        `parser:"@@"`
-	Assign          *Assign          `parser:"@@"`
-	Expression      *Expression      `parser:"| @@"`
-	ValueOrVariable *ValueOrVariable // `parser:"| @@"` // todo weg
+	Pos        lexer.Position
+	Assign     *Assign     `parser:"@@"`
+	Expression *Expression `parser:"| @@"`
 }
 
 type Operator string
@@ -19,16 +17,11 @@ type Assign struct {
 	Pos        lexer.Position
 	Left       string      `parser:"@Ident '='"`
 	Expression *Expression `parser:"@@"`
-	//Expression      *Expression      `parser:"[@@"`
-	//ValueOrVariable *ValueOrVariable `parser:"| @@]"`
-	// Value      Value           `parser:"@@"`
 }
 
 type Expr struct {
-	Left *ValueOrVariable `parser:"@@"`
-	//Operator Operator         `parser:"@Operator"`
-	//Right    *ValueOrVariable `parser:"@@"`
-	Right []*OpTerm `parser:"@@*"`
+	Left  *ValueOrVariable `parser:"@@"`
+	Right []*OpTerm        `parser:"@@*"`
 }
 
 type OpTerm struct {
@@ -43,7 +36,7 @@ type ValueOrVariable struct {
 }
 
 type Value struct {
-	//Pos         lexer.Position
+	Pos         lexer.Position
 	StringValue *string `parser:"@String"`
 	//Float       *float64 `parser: "| @Float"`
 	// Bool TODO
