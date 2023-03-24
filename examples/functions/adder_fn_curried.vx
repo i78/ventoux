@@ -1,0 +1,3 @@
+add a b =  a + b;
+increment = add (1)
+increment(42)
