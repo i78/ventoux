@@ -14,7 +14,8 @@ var (
 		//{"Number", `XKXK[+-]?([0-9]*[.])?[0-9]+`},
 		{"Float", `[+-]?([0-9]*[.])?[0-9]+`},
 		{"Int", `[+-]?[0-9]+`},
-		{"Operator", `[-,()*/+%{};&!=:^]|>>|<<`},
+		{"Boolean", `(true|false)`},
+		{"Operator", `->|[-,()*/+%{};&!=:^]|>>|<<`},
 		{"Ident", `[a-zA-Z]+[0-9]?`},
 		{"Equals", `=`},
 		{"whitespace", ` `},
@@ -25,14 +26,14 @@ var (
 		participle.Lexer(lex),
 		participle.Unquote("String"),
 
-		participle.Union[grammar.ExprOperand](grammar.ExprFunction{}, grammar.ExprFnCall{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprOperand](grammar.ExprFunction{}, grammar.ExprFnCall{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprBoolean{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
 		// Register the grammar.ExprPrec3 union so we can parse expressions at precedence level 3
-		participle.Union[grammar.ExprPrec3](grammar.ExprFnCall{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprPrec3](grammar.ExprFnCall{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprBoolean{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
 		// Register the grammar.ExprPrec2 union so we can parse expressions at precedence level 2
-		participle.Union[grammar.ExprPrec2](grammar.ExprFnCall{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
+		participle.Union[grammar.ExprPrec2](grammar.ExprFnCall{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprBoolean{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}),
 		// Register the grammar.ExprPrecAll union so we can parse expressions at the minimum precedence level
-		participle.Union[grammar.ExprPrecAll](grammar.ExprFunction{}, grammar.ExprFnCall{}, grammar.ExprAddSub{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}, grammar.ExprFnCall{}),
-		participle.Elide("comment"),
+		participle.Union[grammar.ExprPrecAll](grammar.ExprConditional{}, grammar.ExprFunction{}, grammar.ExprFnCall{}, grammar.ExprAddSub{}, grammar.ExprMulDiv{}, grammar.ExprPow{}, grammar.ExprBitshift{}, grammar.ExprRem{}, grammar.ExprUnary{}, grammar.ExprIdent{}, grammar.ExprBoolean{}, grammar.ExprNumber{}, grammar.ExprString{}, grammar.ExprParens{}, grammar.ExprFnCall{}),
+		participle.Elide("comment", "spacing", "whitespace"),
 		participle.UseLookahead(99999))
 )
 
