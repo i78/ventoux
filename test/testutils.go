@@ -28,3 +28,9 @@ func readOrPanic(t *testing.T, filename string) *parser.Program {
 		return nil
 	}
 }
+
+func readStringOrPanic(t *testing.T, source string) *parser.Program {
+	ast, err := parser.ParseCode(source)
+	assert.NoError(t, err)
+	return ast
+}

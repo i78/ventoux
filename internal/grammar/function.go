@@ -11,7 +11,6 @@ func (efe ExprFnCallExt) Evaluate(_ *Variables) Expression {
 
 func (efc ExprFnCall) Evaluate(variables *Variables) *Expression {
 	if fn, exists := (*variables)[efc.FunctionName]; exists {
-
 		if partialInvocation, fnIsPartialInvoked := fn.X.(ExprFnCall); fnIsPartialInvoked {
 			args := append(partialInvocation.Tail, efc.Tail...)
 
@@ -35,6 +34,9 @@ func (efc ExprFnCall) executeWithResultEvaluation(fn *Expression, localVariables
 }
 
 func (efc ExprFnCall) buildLocalFunctionEnvironment(variables *Variables, fn *Expression) Variables {
+	if len(efc.Tail) != len(fn.X.(ExprFunction).ParameterNames) {
+		panic("argument length of call and function do not match")
+	}
 	localVariables := Variables{}
 	for idx, k := range fn.X.(ExprFunction).ParameterNames {
 		localVariables[k] = efc.Tail[idx].Expr.Evaluate(variables)

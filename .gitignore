@@ -3,3 +3,6 @@
 
 # Ventoux binary machine context
 *.vxcontext
+
+# Build outputs
+/ventoux

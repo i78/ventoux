@@ -18,6 +18,7 @@ var (
 		{"Ident", `[a-zA-Z]+[0-9]?`},
 		{"Equals", `=`},
 		{"whitespace", ` `},
+		{"spacing", `[\t]+`},
 		{"eol", `[\n\r]+`},
 	})
 	parser = participle.MustBuild[Program](
