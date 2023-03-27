@@ -78,5 +78,6 @@ func withGobConfiguration() {
 	gob.Register(grammar.ExprMulDiv{})
 	gob.Register(grammar.ExprPow{})
 	gob.Register(grammar.ExprBitshift{})
+	gob.Register(grammar.ExprComparison{})
 	gob.Register(grammar.ExprAddSub{})
 }

@@ -63,6 +63,18 @@ type (
 		Expr ExprPrec3 `parser:"@@"`
 	}
 
+	// Comparison
+	// todo: somewhere else
+	ExprComparison struct {
+		Head ExprPrec3           `parser:"@@"`
+		Tail []ExprComparisonExt `parser:"@@+"`
+	}
+
+	ExprComparisonExt struct {
+		Op   string    `parser:"@('<' | '>' | '>=' | '<=' )"`
+		Expr ExprPrec3 `parser:"@@"`
+	}
+
 	ExprBitshift struct {
 		Head ExprPrec3         `parser:"@@"`
 		Tail []ExprBitshiftExt `parser:"@@+"`
@@ -129,32 +141,34 @@ func (ExprRem) exprPrec3()     {}
 func (ExprFnCall) exprPrec3()  {}
 
 // These expression types can be matched at precedence level 2
-func (ExprIdent) exprPrec2()    {}
-func (ExprNumber) exprPrec2()   {}
-func (ExprBoolean) exprPrec2()  {}
-func (ExprString) exprPrec2()   {}
-func (ExprParens) exprPrec2()   {}
-func (ExprUnary) exprPrec2()    {}
-func (ExprRem) exprPrec2()      {}
-func (ExprMulDiv) exprPrec2()   {}
-func (ExprPow) exprPrec2()      {}
-func (ExprBitshift) exprPrec2() {}
-func (ExprFnCall) exprPrec2()   {}
+func (ExprIdent) exprPrec2()      {}
+func (ExprNumber) exprPrec2()     {}
+func (ExprBoolean) exprPrec2()    {}
+func (ExprString) exprPrec2()     {}
+func (ExprParens) exprPrec2()     {}
+func (ExprUnary) exprPrec2()      {}
+func (ExprRem) exprPrec2()        {}
+func (ExprComparison) exprPrec2() {}
+func (ExprMulDiv) exprPrec2()     {}
+func (ExprPow) exprPrec2()        {}
+func (ExprBitshift) exprPrec2()   {}
+func (ExprFnCall) exprPrec2()     {}
 
 // These expression types can be matched at the minimum precedence level
-func (ExprIdent) exprPrecAll()    {}
-func (ExprNumber) exprPrecAll()   {}
-func (ExprBoolean) exprPrecAll()  {}
-func (ExprString) exprPrecAll()   {}
-func (ExprParens) exprPrecAll()   {}
-func (ExprUnary) exprPrecAll()    {}
-func (ExprRem) exprPrecAll()      {}
-func (ExprMulDiv) exprPrecAll()   {}
-func (ExprPow) exprPrecAll()      {}
-func (ExprBitshift) exprPrecAll() {}
-func (ExprAddSub) exprPrecAll()   {}
-func (ExprFnCall) exprPrecAll()   {}
-func (ExprFunction) exprPrecAll() {}
+func (ExprIdent) exprPrecAll()      {}
+func (ExprNumber) exprPrecAll()     {}
+func (ExprBoolean) exprPrecAll()    {}
+func (ExprString) exprPrecAll()     {}
+func (ExprParens) exprPrecAll()     {}
+func (ExprUnary) exprPrecAll()      {}
+func (ExprRem) exprPrecAll()        {}
+func (ExprMulDiv) exprPrecAll()     {}
+func (ExprComparison) exprPrecAll() {}
+func (ExprPow) exprPrecAll()        {}
+func (ExprBitshift) exprPrecAll()   {}
+func (ExprAddSub) exprPrecAll()     {}
+func (ExprFnCall) exprPrecAll()     {}
+func (ExprFunction) exprPrecAll()   {}
 
 type Expression struct {
 	X ExprPrecAll `@@`
@@ -165,6 +179,8 @@ func (e *Expression) ToString() string {
 		return it.Value
 	} else if it, ok := e.X.(ExprNumber); ok {
 		return fmt.Sprintf("%f", it.Value)
+	} else if it, ok := e.X.(ExprBoolean); ok {
+		return fmt.Sprintf("%t", it.Value)
 	}
 	return ""
 }
