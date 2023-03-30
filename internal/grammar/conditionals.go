@@ -7,7 +7,7 @@ type (
 
 	ExprConditionalOption struct {
 		Precondition *Expression `parser:"@@?"`
-		Result       *Expression `parser:"'->'@@+"`
+		Result       *Expression `parser:"Arrow @@"`
 	}
 )
 

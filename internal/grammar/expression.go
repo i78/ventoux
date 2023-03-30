@@ -71,7 +71,7 @@ type (
 	}
 
 	ExprComparisonExt struct {
-		Op   string    `parser:"@('<' | '>' | '>=' | '<=' )"`
+		Op   string    `parser:"@('<' | '>' | '>=' | '<=' | '=' )"`
 		Expr ExprPrec3 `parser:"@@"`
 	}
 

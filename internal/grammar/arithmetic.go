@@ -57,7 +57,7 @@ func (ecm ExprComparison) Evaluate(variables *Variables) *Expression {
 
 	left = ecm.Head.(ExprEvaluatable).Evaluate(variables).X.(ExprNumber).Value
 
-	operationResult := false
+	operationResult := true
 
 	for _, it := range ecm.Tail {
 		var right float64
@@ -65,12 +65,16 @@ func (ecm ExprComparison) Evaluate(variables *Variables) *Expression {
 
 		switch it.Op {
 		case ">":
-			operationResult = left > right // todo chaining??
+			operationResult = operationResult && left > right
 		case "<":
-			operationResult = left < right
+			operationResult = operationResult && left < right
 		case ">=":
-			operationResult = left >= right
+			operationResult = operationResult && left >= right
+		case "=":
+			operationResult = operationResult && left == right
 		}
+
+		left = right
 	}
 
 	return &Expression{X: ExprBoolean{Value: operationResult}}
