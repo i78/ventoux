@@ -1,5 +1,22 @@
 package grammar
 
+type (
+	ExprFunction struct {
+		FunctionName   string      `parser:"@Ident"`
+		ParameterNames []string    `parser:"@Ident* '='"`
+		Expression     *Expression `parser:"@@';'"` // todo this must be lazy
+	}
+
+	ExprFnCall struct {
+		FunctionName string          `parser:"@Ident"`
+		Tail         []ExprFnCallExt `parser:"'('@@*')'"`
+	}
+
+	ExprFnCallExt struct {
+		Expr Expression `parser:"@@"`
+	}
+)
+
 func (efn ExprFunction) Evaluate(variables *Variables) *Expression {
 	(*variables)[efn.FunctionName] = &Expression{X: efn}
 	return efn.Expression

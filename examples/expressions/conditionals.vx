@@ -1,0 +1,8 @@
+runtime = 789
+performanceStatement = {
+	0 < runtime < 300   	→ "perfect"
+	300 < runtime < 1000   	→ "average"
+	1000 < runtime < 2000   → "poor"
+        	                → "critical"
+}
+performanceStatement
