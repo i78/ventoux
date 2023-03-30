@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/alecthomas/kong"
-	"github.com/alecthomas/repr"
+	"github.com/k0kubun/pp/v3"
 	"log"
 	"os"
 )
@@ -28,7 +28,9 @@ func (sv *RunCommand) Run(ctx *kong.Context) error {
 		}
 
 		if sv.PrintAst {
-			repr.Print(ast)
+			pp.Default.SetExportedOnly(true)
+			mypp := pp.New()
+			mypp.Println(ast)
 		}
 
 		machine := machine2.NewMachine(func(s string) {
