@@ -20,15 +20,15 @@ func TestOperators(t *testing.T) {
 			code     string
 			expected string
 		}{
-			{`1.0 < 2.0`, "true"},        // todo should work without the spaces, too
-			{`2.0 > 1.0`, "true"},        // todo should work without the spaces, too
-			{`1.0 >= 1.0`, "true"},       // todo should work without the spaces, too
-			{`1.0 = 1.0`, "true"},        // todo should work without the spaces, too
-			{`1.0 = 1.0 = 1.0`, "true"},  // todo should work without the spaces, too
-			{`1.0 = 1.0 = 2.0`, "false"}, // todo should work without the spaces, too
-			{`5 < 1 < 10`, "false"},      // todo should work without the spaces, too
-			{`5 < 9 < 10`, "true"},       // todo should work without the spaces, too
-			{`10 < 42 < 20`, "false"},    // todo should work without the spaces, too
+			{`1.0<2.0`, "true"},
+			{`2.0>1.0`, "true"},
+			{`1.0>=1.0`, "true"},
+			{`1.0=1.0`, "true"},
+			{`1.0= 1.0 = 1.0`, "true"},
+			{`1.0= 1.0 = 2.0`, "false"},
+			{`5 < 1 < 10`, "false"},
+			{`5 < 9 < 10`, "true"},
+			{`10 < 42 < 20`, "false"},
 		}
 
 		for _, testcase := range cases {

@@ -1,7 +1,8 @@
-x = 3
-result = {
-	x=0   	→ 42
-    x>0   	→ 1
-    x<100 	→ -1
-        	→ 303
+runtime = 789
+performanceStatement = {
+	0 < runtime < 300   	→ "perfect"
+	300 < runtime < 1000   	→ "average"
+	1000 < runtime < 2000   → "poor"
+        	                → "critical"
 }
+performanceStatement

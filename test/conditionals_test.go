@@ -1,11 +1,31 @@
 package test
 
 import (
+	machine2 "dreese.de/ventoux/internal/machine"
+	"dreese.de/ventoux/internal/parser"
+	"fmt"
 	"github.com/alecthomas/assert/v2"
+	"os"
 	"testing"
 )
 
 func TestConditionals(t *testing.T) {
+	t.Run("Conditionals Example should return expected result", func(t *testing.T) {
+		if source, err := os.ReadFile("../examples/expressions/conditionals.vx"); err == nil {
+			ast, err := parser.GetParser().ParseString("", string(source))
+			assert.NoError(t, err)
+			tapped := ""
+			tap := func(s string) { tapped = fmt.Sprintf("%s%s", tapped, s) }
+			machine := machine2.NewMachine(tap)
+
+			machine.EvalProgram(ast)
+
+			assert.Equal(t, "average", tapped)
+		} else {
+			t.Fatal("Unable to load source file")
+		}
+	})
+
 	cases := []struct {
 		description string
 		code        string
