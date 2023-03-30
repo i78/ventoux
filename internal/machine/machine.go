@@ -23,7 +23,6 @@ func (machine *Machine) EvalProgram(program *parser.Program) *grammar.Expression
 	for _, st := range program.TopDec {
 		res := machine.EvalTop(st)
 		if res != nil {
-			//fmt.Println(res.ToString())
 			machine.ConsoleOutputFn(res.ToString())
 		}
 	}
@@ -47,12 +46,6 @@ func (machine *Machine) EvalAssign(a *grammar.Assign) *grammar.Expression {
 	machine.Variables[a.Left] = a.Expression
 	return nil
 }
-
-/*
-func (machine *Machine) EvalFunction(fn *grammar.Function) *grammar.Expression {
-	//	machine.Variables[fn.FunctionName] = a
-	return nil
-}*/
 
 func (machine *Machine) ExportMachineState() []byte {
 	var buffer bytes.Buffer

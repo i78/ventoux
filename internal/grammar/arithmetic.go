@@ -2,6 +2,58 @@ package grammar
 
 import "math"
 
+type (
+	ExprAddSub struct {
+		Head ExprPrec2       `parser:"@@"`
+		Tail []ExprAddSubExt `parser:"@@+"`
+	}
+
+	ExprAddSubExt struct {
+		Op   string    `parser:"@('+' | '-')"`
+		Expr ExprPrec2 `parser:"@@"`
+	}
+
+	ExprMulDiv struct {
+		Head ExprPrec3       `parser:"@@"`
+		Tail []ExprMulDivExt `parser:"@@+"`
+	}
+
+	ExprMulDivExt struct {
+		Op   string    `parser:"@('*' | '/')"`
+		Expr ExprPrec3 `parser:"@@"`
+	}
+
+	ExprPow struct {
+		Head ExprPrec3    `parser:"@@"`
+		Tail []ExprPowExt `parser:"@@+"`
+	}
+
+	ExprPowExt struct {
+		Op   string    `parser:"@('^' )"`
+		Expr ExprPrec3 `parser:"@@"`
+	}
+
+	ExprComparison struct {
+		Head ExprPrec3           `parser:"@@"`
+		Tail []ExprComparisonExt `parser:"@@+"`
+	}
+
+	ExprComparisonExt struct {
+		Op   string    `parser:"@('<' | '>' | '>=' | '<=' | '=' )"`
+		Expr ExprPrec3 `parser:"@@"`
+	}
+
+	ExprBitshift struct {
+		Head ExprPrec3         `parser:"@@"`
+		Tail []ExprBitshiftExt `parser:"@@+"`
+	}
+
+	ExprBitshiftExt struct {
+		Op   string    `parser:"@('<<' | '>>' )"`
+		Expr ExprPrec3 `parser:"@@"`
+	}
+)
+
 func (eas ExprAddSub) Evaluate(variables *Variables) *Expression {
 	var left float64
 

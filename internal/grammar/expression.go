@@ -4,22 +4,7 @@ import (
 	"fmt"
 )
 
-// todo this does not belong here.
-type Variables = map[string]*Expression
-
 type (
-	ExprString struct {
-		Value string `parser:"@String"`
-	}
-
-	ExprNumber struct {
-		Value float64 `parser:"@Int | @Float"`
-	}
-
-	ExprBoolean struct {
-		Value bool `parser:"@Boolean"`
-	}
-
 	ExprIdent struct {
 		Name string `parser:"@Ident"`
 	}
@@ -33,58 +18,6 @@ type (
 		Expr ExprOperand `parser:"@@"`
 	}
 
-	ExprAddSub struct {
-		Head ExprPrec2       `parser:"@@"`
-		Tail []ExprAddSubExt `parser:"@@+"`
-	}
-
-	ExprAddSubExt struct {
-		Op   string    `parser:"@('+' | '-')"`
-		Expr ExprPrec2 `parser:"@@"`
-	}
-
-	ExprMulDiv struct {
-		Head ExprPrec3       `parser:"@@"`
-		Tail []ExprMulDivExt `parser:"@@+"`
-	}
-
-	ExprMulDivExt struct {
-		Op   string    `parser:"@('*' | '/')"`
-		Expr ExprPrec3 `parser:"@@"`
-	}
-
-	ExprPow struct {
-		Head ExprPrec3    `parser:"@@"`
-		Tail []ExprPowExt `parser:"@@+"`
-	}
-
-	ExprPowExt struct {
-		Op   string    `parser:"@('^' )"`
-		Expr ExprPrec3 `parser:"@@"`
-	}
-
-	// Comparison
-	// todo: somewhere else
-	ExprComparison struct {
-		Head ExprPrec3           `parser:"@@"`
-		Tail []ExprComparisonExt `parser:"@@+"`
-	}
-
-	ExprComparisonExt struct {
-		Op   string    `parser:"@('<' | '>' | '>=' | '<=' | '=' )"`
-		Expr ExprPrec3 `parser:"@@"`
-	}
-
-	ExprBitshift struct {
-		Head ExprPrec3         `parser:"@@"`
-		Tail []ExprBitshiftExt `parser:"@@+"`
-	}
-
-	ExprBitshiftExt struct {
-		Op   string    `parser:"@('<<' | '>>' )"`
-		Expr ExprPrec3 `parser:"@@"`
-	}
-
 	ExprRem struct {
 		Head ExprOperand  `parser:"@@"`
 		Tail []ExprRemExt `parser:"@@+"`
@@ -95,26 +28,10 @@ type (
 		Expr ExprOperand `parser:"@@"`
 	}
 
-	ExprFunction struct {
-		FunctionName   string      `parser:"@Ident"`
-		ParameterNames []string    `parser:"@Ident* '='"`
-		Expression     *Expression `parser:"@@';'"` // todo this must be lazy
-	}
-
-	ExprFnCall struct {
-		FunctionName string          `parser:"@Ident"`
-		Tail         []ExprFnCallExt `parser:"'('@@*')'"`
-	}
-
-	ExprFnCallExt struct {
-		Expr Expression `parser:"@@"`
-	}
-
 	ExprPrecAll interface{ exprPrecAll() }
 	ExprPrec2   interface{ exprPrec2() }
 	ExprPrec3   interface{ exprPrec3() }
 	ExprOperand interface{ exprOperand() }
-	//ExprFunctionCall interface{ exprFunctionCall() }
 
 	ExprEvaluatable interface{ Evaluate(*Variables) *Expression }
 	ExprTerminal    interface{ Terminal() *Expression }
@@ -191,22 +108,6 @@ func (eid ExprIdent) Evaluate(variables *Variables) *Expression {
 	}
 	// Else, return lazy lets talk about it.
 	return &Expression{X: eid}
-}
-
-func (en ExprNumber) Terminal() *Expression {
-	return &Expression{X: en}
-}
-
-func (en ExprNumber) Evaluate(*Variables) *Expression {
-	return &Expression{X: en}
-}
-
-func (en ExprBoolean) Terminal() *Expression {
-	return &Expression{X: en}
-}
-
-func (es ExprString) Evaluate(*Variables) *Expression {
-	return &Expression{X: es}
 }
 
 // todo type
