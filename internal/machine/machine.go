@@ -73,4 +73,5 @@ func withGobConfiguration() {
 	gob.Register(grammar.ExprBitshift{})
 	gob.Register(grammar.ExprComparison{})
 	gob.Register(grammar.ExprAddSub{})
+	gob.Register(grammar.ExprConditional{})
 }
