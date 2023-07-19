@@ -1,3 +1,4 @@
+![](docs/content/assets/img/logo/vx-logo.png)
 # Ventoux Scripting Language
 Ventoux is a functional scripting language powered by Golang, heavily impressed by Haskell.
 
